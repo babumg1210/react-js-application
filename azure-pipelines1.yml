@@ -1,21 +1,29 @@
-# Node.js with React
-# Build a Node.js project that uses React.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
-
 trigger:
-- main
+  branches:
+    include:
+      - main
+      - feature/*
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: SWA-Secrets
+- name: build_dir
+  value: 'build'
 
 steps:
 - task: NodeTool@0
   inputs:
-    versionSpec: '20.x'
-  displayName: 'Install Node.js'
+    versionSpec: '18.x'
 
 - script: |
     npm install
     npm run build
-  displayName: 'npm install and build'
+  displayName: 'Install and Build React App'
+
+- task: AzureStaticWebApp@0
+  inputs:
+    app_location: '/'
+    output_location: '$(build_dir)'
+    azure_static_web_apps_api_token: $(deployment_token)
